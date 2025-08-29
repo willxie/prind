@@ -1,12 +1,6 @@
 ## Personal commands
 
 ```
-docker compose --profile mainsail --profile mobileraker_companion up -d
-```
-
-host mcu for input shaping:
-```
-docker compose --profile mainsail --profile hostmcu up -d
 docker compose --profile mainsail  --profile mobileraker_companion --profile hostmcu up -d
 ```
 
