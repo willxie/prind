@@ -15,7 +15,7 @@ jobs:
     outputs:
       apps: ${{ steps.filter.outputs.changes }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: dorny/paths-filter@v3
@@ -30,6 +30,8 @@ jobs:
               - docker/moonraker/**
             ustreamer:
               - docker/ustreamer/**
+            laserweb:
+              - docker/laserweb/**
   build:
     needs: changes
     if: ${{ needs.changes.outputs.apps != '' && toJson(fromJson(needs.changes.outputs.apps)) != '[]' }}
@@ -40,13 +42,13 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: "[prind] checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
       - name: "[prind] set up build environment"
         uses: ./.github/actions/image-build-common
       - name: "[docker] login"
-        uses: docker/login-action@v3.4.0
+        uses: docker/login-action@v3.6.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}

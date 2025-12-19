@@ -3,14 +3,32 @@
   "extends": [
     "config:recommended"
   ],
-
   "timezone": "Europe/Berlin",
-  "schedule": "every 2 weeks on friday",
+  "schedule": "on friday",
   "automerge": true,
   "automergeStrategy": "squash",
   "platformAutomerge": false,
   "packageRules": [
     {"matchPackageNames": ["traefik"],"extractVersion": "^v(?<version>.*)$"},
-    {"matchPackageNames": ["python"], "matchFileNames": ["docker/moonraker/Dockerfile", "docker/klipper/Dockerfile"], "enabled": false}
+    {"matchPackageNames": ["python", "debian"], "automerge": false},
+    {"matchPackageNames": ["python"], "allowedVersions": "/^3\\.12(\\.\\d+)?(-.+)?$/"},
+    {"matchPackageNames": ["debian"], "matchManagers": ["dockerfile"], "enabled": false},
+    {"matchPackageNames": ["node"], "matchFileNames": ["docker/laserweb/Dockerfile"], "enabled": false}
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/(^|/|\\.)Dockerfile$/",
+        "/(^|/)Dockerfile\\.[^/]*$/"
+      ],
+      "depNameTemplate": "debian",
+      "versioningTemplate": "debian",
+      "datasourceTemplate": "docker",
+      "matchStrings": [
+        "FROM.*(python|node):[\\w\\d\\.]+-(?:slim-)?(?<currentValue>[a-z0-9]+)(?:\\s+.*)?",
+        "FROM.*debian:(?<currentValue>[a-z0-9]+)(?:-slim)?(?:\\s+.*)?"
+      ]
+    }
   ]
 }

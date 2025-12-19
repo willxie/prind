@@ -1,6 +1,6 @@
 ## Get Klipper Source and Build venv
 ##
-FROM python:3.11-bookworm AS build
+FROM python:3.12-trixie AS build
 
 RUN apt update \
  && apt install -y cmake \
@@ -29,7 +29,7 @@ RUN venv/bin/pip install -r klipper/scripts/klippy-requirements.txt \
 
 ## Klippy Runtime Image
 ##
-FROM python:3.11-slim-bookworm AS run
+FROM python:3.12-slim-trixie AS run
 
 WORKDIR /opt
 RUN groupadd klipper --gid 1000 \
@@ -53,10 +53,8 @@ CMD ["-I", "printer_data/run/klipper.tty", "-a", "printer_data/run/klipper.sock"
 
 ## Image for building MCU code including other tooling
 ##
-FROM debian:bookworm AS tools
+FROM build AS tools
 
-WORKDIR /opt
-ARG DEBIAN_FRONTEND=noninteractive
 RUN apt update \
  && apt install -y \
       sudo \
@@ -65,11 +63,14 @@ RUN apt update \
       avrdude gcc-avr binutils-avr avr-libc \
       stm32flash dfu-util libnewlib-arm-none-eabi \
       gcc-arm-none-eabi binutils-arm-none-eabi libusb-1.0-0 libusb-1.0-0-dev \
-      python3-numpy python3-matplotlib \
  && apt clean
 
-COPY --from=build /opt/klipper ./klipper
-COPY --from=build /opt/venv ./venv
+COPY requirements-prind-tools.txt .
+RUN venv/bin/pip install -r requirements-prind-tools.txt
+
+RUN ln -s /opt/venv /root/klippy-env
+ENV PATH=/opt/venv/bin:$PATH
+ENTRYPOINT ["/usr/bin/bash"]
 ###
 
 
@@ -87,7 +88,7 @@ RUN cd klipper \
 
 ## Runtime image for the klipper_mcu binary
 ##
-FROM debian:bookworm-slim AS hostmcu
+FROM debian:trixie-slim AS hostmcu
 
 RUN apt update \
  && apt install -y gpiod \
@@ -108,7 +109,7 @@ FROM tools AS build-simulavr
 RUN apt update \
  && apt install -y \
       git cmake swig \
-      python3-dev \
+      python3-dev python3-setuptools \
  && apt clean
 
 WORKDIR /opt/klipper
