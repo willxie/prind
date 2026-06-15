@@ -25,3 +25,14 @@ services:
       traefik.http.routers.webcam.entrypoints: web
       traefik.http.middlewares.webcam.stripprefix.prefixes: /webcam
       traefik.http.routers.webcam.middlewares: webcam
+
+  klipper:
+    # keep Klipper on one core (e.g., core 3 on a Pi 4)
+    cpuset: "3"
+
+    # allow RT scheduling from inside the container
+    cap_add:
+      - SYS_NICE
+    ulimits:
+      rtprio: 99
+      memlock: -1
