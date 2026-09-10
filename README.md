@@ -1,14 +1,41 @@
 # Personal commands
 
+### Install on project dir
+```
+cd ~/prind
+
+cat > prind-tools <<'EOF'
+#!/bin/sh
+project_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+
+exec docker compose \
+  --project-directory "$project_dir" \
+  -f "$project_dir/docker-compose.extra.tools.yaml" \
+  run --rm tools "$@"
+EOF
+
+chmod +x prind-tools
+```
+
 ```
 docker compose --profile mainsail --profile mobileraker_companion --profile hostmcu up -d
 docker compose --profile mainsail --profile mobileraker_companion --profile hostmcu down
 docker compose --profile mainsail --profile mobileraker_companion --profile hostmcu pull
 ```
 
+
 ### Input Shaper Calibration (old)
 
-After running `TEST_RESONANCES` or `SHAPER_CALIBRATE`, Klipper generates csv output in /tmp. To further analyze this data, it has to be extracted from the running klipper container.
+```
+HOME
+SHAPER_CALIBRATE axis=y
+SHAPER_CALIBRATE axis=x
+```
+
+Then copy the provided resonance value to config.
+
+To generate graph:
+
 ```
 mkdir ./resonances
 
@@ -19,18 +46,17 @@ docker compose cp klipper:/tmp/resonances_x_20220708_124515.csv ./resonances/
 docker compose cp klipper:/tmp/resonances_y_20220708_125150.csv ./resonances/
 ```
 
-`docker-compose.extra.calibrate-shaper.yaml` is set up to run `calibrate_shaper.py`, so any options supported by the script can also be used with the container. 
-Set an alias to save yourself from typing the the docker compose command multiple times. The generated Images are located besides the csv files in `./resonances`
-```
-alias calibrate_shaper="docker compose -f docker-compose.extra.calibrate-shaper.yaml run --rm calibrate_shaper"
+Then transfer to files to another machine or do it in-place (takes another large image download).
 
-calibrate_shaper resonances_x_20220708_124515.csv -o cal_x.png
+```
+prind-tools "scripts/calibrate_shaper.py resonances/resonances_x_20220708_124515.csv -o resonances/cal_x.png"
   [...]
   Recommended shaper is ei @ 90.2 Hz
 
-calibrate_shaper resonances_y_20220708_125150.csv -o cal_y.png
+prind-tools "scripts/calibrate_shaper.py resonances/resonances_y_20220708_125150.csv -o resonances/cal_y.png"
   [...]
   Recommended shaper is mzv @ 48.2 Hz
+
 ```
 
 
