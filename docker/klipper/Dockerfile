@@ -2,8 +2,6 @@
 ##
 FROM python:3.12-trixie AS build
 
-ENV CXXFLAGS="-Wno-error"
-
 RUN apt update \
  && apt install -y cmake \
  && apt clean
@@ -68,7 +66,7 @@ RUN apt update \
  && apt clean
 
 COPY requirements-prind-tools.txt .
-RUN venv/bin/pip install -r requirements-prind-tools.txt
+RUN CXXFLAGS="-Wno-error" venv/bin/pip install -r requirements-prind-tools.txt
 
 RUN ln -s /opt/venv /root/klippy-env
 ENV PATH=/opt/venv/bin:$PATH
@@ -124,6 +122,9 @@ RUN groupadd simulavr --gid 1000 \
  && useradd simulavr --uid 1000 --gid simulavr \
  && usermod simulavr --append --groups dialout
 
+# Enable this if you're experiencing klippy timeouts when using simulavr and rebuild the image
+#
+#ENV CXXFLAGS="-O2"
 RUN git clone git://git.savannah.nongnu.org/simulavr.git \
  && cd simulavr \
  && git checkout release-1.1.0 \
