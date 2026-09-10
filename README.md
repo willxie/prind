@@ -1,9 +1,9 @@
 # Personal commands
 
 ```
-docker compose --profile mainsail --profile mobileraker_companion --profile hostmcu up -d
-docker compose --profile mainsail --profile mobileraker_companion --profile hostmcu down
-docker compose --profile mainsail --profile mobileraker_companion --profile hostmcu pull
+docker compose --profile mainsail --profile mobileraker_companion up -d
+docker compose --profile mainsail --profile mobileraker_companion down
+docker compose --profile mainsail --profile mobileraker_companion pull
 ```
 
 ### Input Shaper Calibration (old)
