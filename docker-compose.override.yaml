@@ -36,3 +36,7 @@ services:
     ulimits:
       rtprio: 99
       memlock: -1
+
+  moonraker:
+    volumes:
+      - ./secrets/moonraker.secrets:/opt/printer_data/moonraker.secrets:ro
